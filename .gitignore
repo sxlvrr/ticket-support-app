@@ -1,0 +1,14 @@
+# Node
+node_modules/
+.env
+
+# React
+build/
+dist/
+
+# Docker
+*.log
+docker-volume/
+
+# VS Code
+.vscode/
