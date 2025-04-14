@@ -1,13 +1,108 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accueil - Support Tickets</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+    a, button, select {
+      margin-right: 10px;
+      margin-top: 5px;
+    }
+    li {
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 1rem;
+    }
+    .label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📋 Liste des tickets</h1>
+  <a href="creer.html">➕ Créer un ticket</a><br /><br />
+  <label for="filtre">Filtrer par priorité :</label>
+  <select id="filtre" onchange="document.dispatchEvent(new CustomEvent('filtrer', { detail: this.value }))">
+    <option value="">Toutes</option>
+    <option value="Faible">Faible</option>
+    <option value="Moyenne">Moyenne</option>
+    <option value="Élevée">Élevée</option>
+    <option value="Critique">Critique</option>
+  </select>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function App() {
+      const [tickets, setTickets] = React.useState([]);
+      const [filtre, setFiltre] = React.useState('');
+      const [message, setMessage] = React.useState('');
+
+      React.useEffect(() => {
+        fetchTickets();
+        document.addEventListener('filtrer', (e) => {
+          setFiltre(e.detail);
+        });
+      }, []);
+
+      const fetchTickets = () => {
+        fetch('http://localhost:5000/tickets')
+          .then(res => res.json())
+          .then(data => setTickets(data))
+          .catch(err => console.error(err));
+      };
+
+      const handleDelete = (id) => {
+        if (confirm('Tu veux vraiment supprimer ce ticket ? 🗑️')) {
+          fetch(`http://localhost:5000/tickets/${id}`, {
+            method: 'DELETE'
+          })
+            .then(res => res.json())
+            .then(data => {
+              setMessage(data.message);
+              fetchTickets();
+            })
+            .catch(() => alert("Erreur lors de la suppression ❌"));
+        }
+      };
+
+      const ticketsFiltres = filtre
+        ? tickets.filter(ticket => ticket.priorité === filtre)
+        : tickets;
+
+      return (
+        <div>
+          <ul>
+            {ticketsFiltres.map(ticket => (
+              <li key={ticket.id}>
+                <div><span className="label">ID :</span> {ticket.id}</div>
+                <div><span className="label">Titre :</span> {ticket.titre}</div>
+                <div><span className="label">Description :</span> {ticket.description}</div>
+                <div><span className="label">Statut :</span> {ticket.statut}</div>
+                <div><span className="label">Priorité :</span> {ticket.priorité}</div>
+                <div><span className="label">Date création :</span> {ticket.date_creation}</div>
+                <div><span className="label">Date mise à jour :</span> {ticket.date_mise_a_jour}</div>
+                <div><span className="label">Employé :</span> {ticket.id_employe}</div>
+                <div><span className="label">Technicien :</span> {ticket.id_technicien || 'Non assigné'}</div>
+                <br />
+                <a href={"modifier.html?id=" + ticket.id}>✏️ Modifier</a>
+                <button onClick={() => handleDelete(ticket.id)}>❌ Supprimer</button>
+              </li>
+            ))}
+          </ul>
+          {message && <p><strong>{message}</strong></p>}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
 </html>
