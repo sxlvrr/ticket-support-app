@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Connexion</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    input { display: block; margin-bottom: 1rem; width: 300px; }
+    .message { font-weight: bold; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>🔐 Connexion</h1>
+  <form id="loginForm">
+    <input type="email" name="email" placeholder="Email" required />
+    <input type="password" name="mot_de_passe" placeholder="Mot de passe" required />
+    <button type="submit">Se connecter</button>
+    <p class="message" id="msg"></p>
+  </form>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const res = await fetch('http://localhost:5000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const json = await res.json();
+
+        if (res.ok) {
+          // Enregistrer l'utilisateur dans le localStorage
+          localStorage.setItem("utilisateur", JSON.stringify(json.utilisateur));
+
+          // Redirection selon le rôle
+          if (json.utilisateur.role === "Admin") {
+            window.location.href = "admin.html";
+          } else if (json.utilisateur.role === "Technicien") {
+            window.location.href = "index.html";
+          } else if (json.utilisateur.role === "Employé") {
+            window.location.href = "employe.html";
+          }
+        } else {
+          msg.textContent = json.message;
+          msg.style.color = "crimson";
+        }
+      } catch (error) {
+        msg.textContent = "Erreur de connexion ❌";
+        msg.style.color = "crimson";
+      }
+    });
+  </script>
+</body>
+</html>

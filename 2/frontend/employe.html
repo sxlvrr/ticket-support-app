@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Espace Employé</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    a, li, button {
+      margin-bottom: 1rem;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>👤 Espace Employé</h1>
+  <a href="creer_employe.html">➕ Soumettre un ticket</a>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function App() {
+      const [tickets, setTickets] = React.useState([]);
+      const id_employe = localStorage.getItem('id');
+
+      React.useEffect(() => {
+        fetch('http://localhost:5000/tickets')
+          .then(res => res.json())
+          .then(data => {
+            const filtres = data.filter(t => t.id_employe == id_employe);
+            setTickets(filtres);
+          })
+          .catch(err => console.error('Erreur chargement tickets', err));
+      }, []);
+
+      return (
+        <ul>
+          {tickets.map(ticket => (
+            <li key={ticket.id}>
+              <strong>ID :</strong> {ticket.id}<br/>
+              <strong>Titre :</strong> {ticket.titre}<br/>
+              <strong>Description :</strong> {ticket.description}<br/>
+              <strong>Statut :</strong> {ticket.statut}<br/>
+              <strong>Priorité :</strong> {ticket.priorité}<br/>
+              <strong>Technicien :</strong> {ticket.id_technicien || 'Non assigné'}<br/>
+              <strong>Mis à jour :</strong> {ticket.date_mise_a_jour}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

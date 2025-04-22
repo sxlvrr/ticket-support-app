@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Espace Admin</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    h2 { margin-top: 2rem; }
+    input, select, button { margin: 0.5rem 0; display: block; width: 300px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    .message { font-weight: bold; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>👑 Espace Administrateur</h1>
+  <a href="login.html">Se déconnecter</a>
+
+  <h2>Liste des utilisateurs</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Rôle</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="liste"></tbody>
+  </table>
+
+  <h2>Ajouter un utilisateur</h2>
+  <form id="formulaire">
+    <input type="text" name="nom" placeholder="Nom" required />
+    <input type="text" name="prenom" placeholder="Prénom" required />
+    <input type="email" name="email" placeholder="Email" required />
+    <input type="password" name="mot_de_passe" placeholder="Mot de passe" required />
+    <select name="role">
+      <option value="Employé">Employé</option>
+      <option value="Technicien">Technicien</option>
+    </select>
+    <button type="submit">Ajouter</button>
+    <p class="message" id="msg"></p>
+  </form>
+
+  <script>
+    const liste = document.getElementById('liste');
+    const msg = document.getElementById('msg');
+
+    async function chargerUtilisateurs() {
+      const res = await fetch('http://localhost:5000/admin/users');
+      const users = await res.json();
+      liste.innerHTML = users.map(u => `
+        <tr>
+          <td>${u.nom}</td>
+          <td>${u.prenom}</td>
+          <td>${u.email}</td>
+          <td>${u.role}</td>
+          <td><button onclick="supprimer(${u.id})">Supprimer</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function supprimer(id) {
+      if (!confirm('Confirmer la suppression ?')) return;
+      await fetch(`http://localhost:5000/admin/users/${id}`, { method: 'DELETE' });
+      chargerUtilisateurs();
+    }
+
+    document.getElementById('formulaire').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+
+      const res = await fetch('http://localhost:5000/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+
+      if (res.ok) {
+        msg.textContent = json.message;
+        msg.style.color = 'green';
+        e.target.reset();
+        chargerUtilisateurs();
+      } else {
+        msg.textContent = json.message;
+        msg.style.color = 'crimson';
+      }
+    });
+
+    chargerUtilisateurs();
+  </script>
+</body>
+</html>
