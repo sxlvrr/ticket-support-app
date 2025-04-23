@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   nom VARCHAR(100),
   email VARCHAR(100) UNIQUE,
   mot_de_passe VARCHAR(255),
-  role ENUM('Employé', 'Technicien', 'Admin'),
+  role ENUM('Employe', 'Technicien', 'Admin'),
   date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS tickets (
   titre VARCHAR(255),
   description TEXT,
   statut ENUM('Ouvert', 'En cours', 'Résolu', 'Fermé') DEFAULT 'Ouvert',
-  priorité ENUM('Faible', 'Moyenne', 'Élevée', 'Critique') DEFAULT 'Faible',
+  priorite ENUM('Faible', 'Moyenne', 'Élevée', 'Critique') DEFAULT 'Faible',
   date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
   date_mise_a_jour DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   id_employe INT,

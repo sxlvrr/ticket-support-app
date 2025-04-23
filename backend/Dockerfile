@@ -1,20 +1,26 @@
-# Utilise l'image officielle de Node.js comme base
-FROM node:16
+# Utilise l'image officielle Node.js
+FROM node:18
 
-# Crée et définit le répertoire de travail
+# Dossier de travail dans le conteneur
 WORKDIR /app
 
-# Copie les fichiers package.json et package-lock.json
+# Copie des fichiers package.json
 COPY package*.json ./
 
-# Installe les dépendances
+# Installation des dépendances
 RUN npm install
 
-# Copie tout le reste du code de l'application
+# Copie du reste des fichiers
 COPY . .
 
-# Expose le port sur lequel l'app va tourner
-EXPOSE 3001
+# Port exposé
+EXPOSE 5000
 
-# Démarre l'application
-CMD ["npm", "start"]
+# Variables d'environnement par défaut (optionnel)
+ENV DB_HOST=db
+ENV DB_USER=root
+ENV DB_PASSWORD=exemple
+ENV DB_NAME=support_tickets
+
+# Lancer le serveur
+CMD ["node", "server.js"]
